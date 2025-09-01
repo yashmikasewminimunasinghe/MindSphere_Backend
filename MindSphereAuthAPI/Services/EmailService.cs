@@ -1,36 +1,63 @@
 ﻿using System.Net;
 using System.Net.Mail;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
-public static class EmailService
+namespace MindSphereAuthAPI.Services
 {
-    public static async Task SendSessionLinkAsync(string email, string sessionLink, DateTime sessionDateTime, string counsellorName, string recipientName)
+    public class EmailService
     {
-        var smtpClient = new SmtpClient("smtp.gmail.com")
+        private readonly IConfiguration _config;
+
+        public EmailService(IConfiguration config)
         {
-            Port = 587,
-            Credentials = new NetworkCredential("your-email@gmail.com", "your-app-password"),
-            EnableSsl = true,
-        };
+            _config = config;
+        }
 
-        var mailMessage = new MailMessage
+        public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            From = new MailAddress("your-email@gmail.com"),
-            Subject = "Counseling Session Confirmation",
-            Body = $@"
-                <p>Hi {recipientName},</p>
-                <p>Your counseling session has been confirmed.</p>
-                <p><strong>Session Details:</strong></p>
-                <ul>
-                    <li><strong>Date & Time:</strong> {sessionDateTime.ToString("f")}</li>
-                    <li><strong>Counsellor:</strong> {counsellorName}</li>
-                    <li><strong>Session Link:</strong> <a href='{sessionLink}'>{sessionLink}</a></li>
-                </ul>
-                <p>Please join on time. Thank you for choosing MindSphere.</p>",
-            IsBodyHtml = true,
-        };
+            var fromEmail = _config["EmailSettings:FromEmail"];
+            var fromPassword = _config["EmailSettings:AppPassword"];
 
-        mailMessage.To.Add(email);
+            using (var smtpClient = new SmtpClient("smtp.gmail.com"))
+            {
+                smtpClient.Port = 587;
+                smtpClient.Credentials = new NetworkCredential(fromEmail, fromPassword);
+                smtpClient.EnableSsl = true;
 
-        await smtpClient.SendMailAsync(mailMessage);
+                var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(fromEmail),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = false,
+                };
+                mailMessage.To.Add(toEmail);
+
+                await smtpClient.SendMailAsync(mailMessage);
+            }
+        }
+
+        public async Task SendSessionLinkAsync(string clientEmail, string counsellorEmail, string sessionLink, string dateTime)
+        {
+            // Client email content
+            string clientSubject = "Your Counseling Session Link";
+            string clientBody = $"Hello,\n\nYour counseling session has been scheduled.\n" +
+                                $"Date & Time: {dateTime}\n" +
+                                $"Join here: {sessionLink}\n\n" +
+                                $"Best regards,\nMindSphere";
+
+            // Counsellor email content
+            string counsellorSubject = "New Counseling Session Scheduled";
+            string counsellorBody = $"Hello Counsellor,\n\nA new counseling session has been booked.\n" +
+                                    $"Date & Time: {dateTime}\n" +
+                                    $"Session Link: {sessionLink}\n\n" +
+                                    $"Please be prepared for the session.\n\n" +
+                                    $"Best regards,\nMindSphere";
+
+            // Send to both
+            await SendEmailAsync(clientEmail, clientSubject, clientBody);
+            await SendEmailAsync(counsellorEmail, counsellorSubject, counsellorBody);
+        }
     }
 }

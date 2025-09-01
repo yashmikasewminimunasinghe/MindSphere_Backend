@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace MindSphereAuthAPI.DTOs
 {
@@ -6,13 +7,14 @@ namespace MindSphereAuthAPI.DTOs
     {
         [Required]
         public string Name { get; set; }
+
         [Required]
-        public string Email { get; set; }
+        [EmailAddress]
+        public string Email { get; set; }  // <-- added
+
         [Required]
         public string Specialty { get; set; }
-        [Range(0, 5)]
-        public double Rating { get; set; }
-        public IFormFile Photo { get; set; } // Image file upload
+
         public List<string> AvailableSlots { get; set; }
     }
 }

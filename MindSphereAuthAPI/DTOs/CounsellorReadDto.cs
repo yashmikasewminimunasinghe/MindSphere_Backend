@@ -6,9 +6,8 @@ namespace MindSphereAuthAPI.DTOs
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string Email { get; set; }  // <-- added
         public string Specialty { get; set; }
-        public double Rating { get; set; }
-        public string PhotoUrl { get; set; }
         public List<string> AvailableSlots { get; set; }
     }
 }

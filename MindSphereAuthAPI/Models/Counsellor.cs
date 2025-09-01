@@ -14,10 +14,9 @@ public class Counsellor
     [Required]
     public string Specialty { get; set; }
 
-    [Range(0, 5)]
-    public double Rating { get; set; }
-
-    public string PhotoUrl { get; set; }
+    // Removed Rating and PhotoUrl from AddCounsellor form
+    public double? Rating { get; set; }  // Optional now
+    public string? PhotoUrl { get; set; } // Optional now
 
     public string UserId { get; set; }  // Add this!
 

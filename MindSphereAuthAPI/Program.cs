@@ -9,6 +9,7 @@ using Microsoft.Extensions.FileProviders; // ✅ Required for static file servin
 using System.IO;
 using Microsoft.OpenApi.Models; // Add this for Swagger security
 using Stripe; // ✅ Stripe added
+using MindSphereAuthAPI.Services; // ✅ EmailService namespace
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +102,9 @@ builder.Services.AddSwaggerGen(c =>
 
 // ✅ Stripe Configuration
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+// ✅ Register EmailService
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
